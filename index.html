@@ -2,9 +2,9 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-<title>Veriler</title>
+<title>PS26</title>
 
 <style>
 * {
@@ -14,153 +14,218 @@
 html,
 body {
     margin: 0;
-    padding: 0;
     width: 100%;
     height: 100%;
-    font-family: Arial, sans-serif;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
     background: #f5f6f8;
 }
 
 body {
-    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
 .app {
-    height: 100vh;
+    width: 100%;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
 }
 
 
-/* =========================================
+/* =====================================================
    HEADER
-========================================= */
+===================================================== */
 
 .header {
+    flex: 0 0 auto;
     background: #24292f;
-    color: white;
-    padding: 13px 16px;
-    flex-shrink: 0;
+    color: #fff;
+    padding: 11px 14px;
 }
 
 .header-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .title {
-    font-size: 19px;
-    font-weight: 600;
     flex: 1;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .status {
-    font-size: 13px;
+    font-size: 12px;
     opacity: .8;
+    white-space: nowrap;
 }
 
 
-/* =========================================
-   SHEET TABS
-========================================= */
+/* =====================================================
+   SHEETS
+===================================================== */
 
 .sheet-tabs {
+    flex: 0 0 auto;
+
     display: flex;
     gap: 5px;
+
     overflow-x: auto;
-    background: white;
+
+    padding: 7px 8px;
+
+    background: #fff;
+
     border-bottom: 1px solid #ddd;
-    padding: 7px 9px;
-    flex-shrink: 0;
+
     -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: none;
 }
 
-.sheet-tabs button {
-    border: none;
-    background: #eeeeee;
-    color: #333;
-    padding: 8px 14px;
+.sheet-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.sheet-tab {
+    flex: 0 0 auto;
+
+    border: 0;
+
+    padding: 8px 13px;
+
     border-radius: 6px;
+
+    background: #eee;
+
+    color: #333;
+
+    font-size: 13px;
+
     cursor: pointer;
+
     white-space: nowrap;
-    font-size: 14px;
 }
 
-.sheet-tabs button:hover {
-    background: #ddd;
-}
-
-.sheet-tabs button.active {
+.sheet-tab.active {
     background: #24292f;
-    color: white;
+    color: #fff;
+}
+
+.sheet-tab.loading {
+    opacity: .5;
 }
 
 
-/* =========================================
+/* =====================================================
    TOOLBAR
-========================================= */
+===================================================== */
 
 .toolbar {
-    background: white;
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
+    flex: 0 0 auto;
+
     display: flex;
-    gap: 8px;
-    flex-shrink: 0;
+
+    padding: 7px 8px;
+
+    background: #fff;
+
+    border-bottom: 1px solid #ddd;
 }
 
 .search {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
+
     border: 1px solid #ccc;
+
     border-radius: 7px;
-    padding: 10px 13px;
+
+    padding: 9px 12px;
+
     font-size: 15px;
+
     outline: none;
+
+    -webkit-appearance: none;
 }
 
 .search:focus {
-    border-color: #555;
+    border-color: #777;
 }
 
 
-/* =========================================
-   TABLE
-========================================= */
+/* =====================================================
+   TABLE AREA
+===================================================== */
 
 .table-wrapper {
-    flex: 1;
-    overflow: auto;
-    background: white;
+    flex: 1 1 auto;
+
     position: relative;
+
+    overflow: auto;
+
+    background: #fff;
+
     -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior: contain;
 }
 
 .table {
     position: relative;
+
     min-width: max-content;
 }
 
-.header-row-table {
+
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
+.table-header {
     position: sticky;
+
     top: 0;
-    z-index: 10;
+
+    z-index: 20;
+
     display: flex;
+
+    height: 40px;
+
     background: #24292f;
-    color: white;
+
+    color: #fff;
 }
 
 .header-cell {
-    flex-shrink: 0;
-    height: 42px;
-    padding: 11px 12px;
-    border-right: 1px solid #555;
-    font-weight: bold;
+    flex: 0 0 auto;
+
+    height: 40px;
+
+    padding: 10px 10px;
+
+    border-right: 1px solid #4b5056;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
+
+
+/* =====================================================
+   VIRTUAL ROWS
+===================================================== */
 
 .rows {
     position: relative;
@@ -168,20 +233,35 @@ body {
 
 .row {
     position: absolute;
+
     left: 0;
+
     display: flex;
-    height: 42px;
+
+    width: max-content;
+
+    height: 40px;
 }
 
 .cell {
-    flex-shrink: 0;
-    height: 42px;
-    padding: 11px 12px;
+    flex: 0 0 auto;
+
+    height: 40px;
+
+    padding: 10px;
+
     border-right: 1px solid #eee;
+
     border-bottom: 1px solid #eee;
-    background: white;
+
+    background: #fff;
+
+    font-size: 13px;
+
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -190,20 +270,28 @@ body {
 }
 
 
-/* =========================================
+/* =====================================================
    LOADING
-========================================= */
+===================================================== */
 
 .loading {
     position: fixed;
+
     inset: 0;
-    background: white;
-    z-index: 100;
+
+    z-index: 1000;
+
     display: flex;
-    justify-content: center;
-    align-items: center;
+
     flex-direction: column;
-    gap: 15px;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 13px;
+
+    background: rgba(255,255,255,.96);
 }
 
 .loading.hidden {
@@ -211,63 +299,80 @@ body {
 }
 
 .spinner {
-    width: 35px;
-    height: 35px;
+    width: 32px;
+    height: 32px;
+
     border: 4px solid #ddd;
+
     border-top-color: #24292f;
+
     border-radius: 50%;
+
     animation: spin .7s linear infinite;
 }
 
 @keyframes spin {
-
     to {
         transform: rotate(360deg);
     }
+}
 
+.loading-text {
+    font-size: 14px;
+    color: #555;
 }
 
 
-/* =========================================
-   ERROR
-========================================= */
+/* =====================================================
+   EMPTY
+===================================================== */
 
-.error {
-    padding: 25px;
-    color: #a00000;
+.empty {
+    padding: 30px;
+
+    color: #777;
+
+    font-size: 14px;
 }
 
 
-/* =========================================
+/* =====================================================
    MOBILE
-========================================= */
+===================================================== */
 
 @media (max-width: 600px) {
 
+    .header {
+        padding:
+            10px
+            12px;
+    }
+
     .title {
-        font-size: 17px;
+        font-size: 16px;
     }
 
     .status {
         font-size: 11px;
     }
 
-    .sheet-tabs button {
-        padding: 8px 12px;
+    .sheet-tab {
+        padding: 8px 11px;
+        font-size: 12px;
     }
 
     .header-cell,
     .cell {
-        padding-left: 9px;
-        padding-right: 9px;
+        padding-left: 8px;
+        padding-right: 8px;
     }
-
 }
 </style>
 </head>
 
 
 <body>
+
 
 <div class="app">
 
@@ -279,14 +384,14 @@ body {
         <div class="header-row">
 
             <div class="title">
-                Veriler
+                PS26
             </div>
 
             <div
                 id="status"
                 class="status"
             >
-                Yükleniyor...
+                TICKET
             </div>
 
         </div>
@@ -294,7 +399,7 @@ body {
     </div>
 
 
-    <!-- SHEET TABS -->
+    <!-- SHEETS -->
 
     <div
         id="sheetTabs"
@@ -310,8 +415,9 @@ body {
             id="search"
             class="search"
             type="search"
-            placeholder="Bu sayfada ara..."
+            placeholder="Ara..."
             autocomplete="off"
+            spellcheck="false"
         >
 
     </div>
@@ -343,8 +449,11 @@ body {
 
     <div class="spinner"></div>
 
-    <div id="loadingText">
-        Veriler yükleniyor...
+    <div
+        id="loadingText"
+        class="loading-text"
+    >
+        TICKET yükleniyor...
     </div>
 
 </div>
@@ -355,43 +464,45 @@ body {
 "use strict";
 
 
-/* =========================================
+/* =====================================================
    AYARLAR
-========================================= */
+===================================================== */
 
-const DATA_FILE = "data.json";
+const DATA_PATH = "./data/";
+
+const ROW_HEIGHT = 40;
+
+const BUFFER_ROWS = 12;
 
 const DEFAULT_SHEET = "TICKET";
 
-const ROW_HEIGHT = 42;
 
-const BUFFER = 10;
+/* =====================================================
+   STATE
+===================================================== */
 
+let sheetList = [];
 
-/* =========================================
-   GLOBAL
-========================================= */
+let sheetCache = new Map();
 
-let sheets = {};
-
-let currentSheet = "";
-
-let rows = [];
+let currentSheet = null;
 
 let headers = [];
+
+let rows = [];
 
 let indexes = [];
 
 let widths = [];
 
-let animationFrame = null;
+let renderFrame = null;
 
 let searchTimer = null;
 
 
-/* =========================================
+/* =====================================================
    ELEMENTLER
-========================================= */
+===================================================== */
 
 const loading =
     document.getElementById(
@@ -408,6 +519,16 @@ const status =
         "status"
     );
 
+const sheetTabs =
+    document.getElementById(
+        "sheetTabs"
+    );
+
+const search =
+    document.getElementById(
+        "search"
+    );
+
 const wrapper =
     document.getElementById(
         "tableWrapper"
@@ -418,31 +539,24 @@ const table =
         "table"
     );
 
-const search =
-    document.getElementById(
-        "search"
-    );
 
-const sheetTabs =
-    document.getElementById(
-        "sheetTabs"
-    );
+/* =====================================================
+   BAŞLAT
+===================================================== */
 
-
-/* =========================================
-   VERİYİ YÜKLE
-========================================= */
-
-async function loadData() {
+async function init() {
 
     try {
 
-        loadingText.textContent =
-            "Veriler yükleniyor...";
+        /*
+         * İlk isteğimiz sadece 409 byte
+         * civarındaki index.json.
+         */
 
         const response =
             await fetch(
-                DATA_FILE,
+                DATA_PATH +
+                "index.json",
                 {
                     cache: "default"
                 }
@@ -451,56 +565,20 @@ async function loadData() {
         if (!response.ok) {
 
             throw new Error(
-                "data.json bulunamadı."
+                "data/index.json bulunamadı."
             );
 
         }
 
-        const json =
+        const index =
             await response.json();
 
 
-        /*
-        Beklenen yapı:
-
-        {
-            "sheets": {
-
-                "TICKET": {
-                    "headers": [],
-                    "rows": []
-                },
-
-                "SUMMARY": {
-                    "headers": [],
-                    "rows": []
-                }
-
-            }
-        }
-        */
-
-        if (
-            !json.sheets
-        ) {
-
-            throw new Error(
-                "data.json içinde 'sheets' bulunamadı."
-            );
-
-        }
-
-        sheets =
-            json.sheets;
+        sheetList =
+            index.sheets || [];
 
 
-        const names =
-            Object.keys(
-                sheets
-            );
-
-
-        if (!names.length) {
+        if (!sheetList.length) {
 
             throw new Error(
                 "Hiç sheet bulunamadı."
@@ -509,33 +587,34 @@ async function loadData() {
         }
 
 
+        createTabs();
+
+
         /*
-        TICKET varsa onu aç.
-        Yoksa ilk sheet.
-        */
+         * TICKET varsa onu aç.
+         */
+
+        let defaultSheet =
+            index.defaultSheet ||
+            DEFAULT_SHEET;
+
 
         if (
-            sheets[
-                DEFAULT_SHEET
-            ]
+            !sheetList.some(
+                s =>
+                    s.name ===
+                    defaultSheet
+            )
         ) {
 
-            currentSheet =
-                DEFAULT_SHEET;
-
-        }
-        else {
-
-            currentSheet =
-                names[0];
+            defaultSheet =
+                sheetList[0].name;
 
         }
 
 
-        createSheetTabs();
-
-        openSheet(
-            currentSheet
+        await openSheet(
+            defaultSheet
         );
 
 
@@ -549,64 +628,97 @@ async function loadData() {
         console.error(error);
 
         loading.innerHTML =
-            `<div class="error">
-                <strong>Veriler yüklenemedi.</strong>
+            `
+            <div style="
+                max-width:90%;
+                text-align:center;
+                color:#a00000;
+            ">
+                <strong>
+                    Veriler yüklenemedi.
+                </strong>
+
                 <br><br>
+
                 ${escapeHtml(
                     error.message
                 )}
-            </div>`;
+            </div>
+            `;
 
     }
 
 }
 
 
-/* =========================================
-   SHEET SEKMELELERİ
-========================================= */
+/* =====================================================
+   TABLAR
+===================================================== */
 
-function createSheetTabs() {
+function createTabs() {
 
     sheetTabs.innerHTML = "";
 
-    Object.keys(
-        sheets
-    ).forEach(
-        name => {
 
-            const button =
-                document.createElement(
-                    "button"
-                );
+    for (
+        const sheet of sheetList
+    ) {
 
-            button.textContent =
-                name;
+        const button =
+            document.createElement(
+                "button"
+            );
 
-            if (
-                name ===
-                currentSheet
-            ) {
+        button.className =
+            "sheet-tab";
 
-                button.classList.add(
-                    "active"
+        button.textContent =
+            sheet.name;
+
+        button.dataset.sheet =
+            sheet.name;
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                openSheet(
+                    sheet.name
                 );
 
             }
+        );
 
-            button.addEventListener(
-                "click",
-                () => {
 
-                    openSheet(
-                        name
-                    );
+        sheetTabs.appendChild(
+            button
+        );
 
-                }
-            );
+    }
 
-            sheetTabs.appendChild(
-                button
+}
+
+
+/* =====================================================
+   AKTİF TAB
+===================================================== */
+
+function updateActiveTab() {
+
+    const buttons =
+        sheetTabs.querySelectorAll(
+            ".sheet-tab"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.sheet ===
+                currentSheet
             );
 
         }
@@ -615,44 +727,185 @@ function createSheetTabs() {
 }
 
 
-/* =========================================
+/* =====================================================
    SHEET AÇ
-========================================= */
+===================================================== */
 
-function openSheet(name) {
-
-    const sheet =
-        sheets[name];
-
-    if (!sheet) {
-        return;
-    }
+async function openSheet(
+    sheetName
+) {
 
     currentSheet =
-        name;
-
-    headers =
-        sheet.headers || [];
-
-    rows =
-        sheet.rows || [];
+        sheetName;
 
 
-    /*
-    Aramayı temizle.
-    */
+    updateActiveTab();
+
 
     search.value = "";
 
 
+    status.textContent =
+        sheetName;
+
+
     /*
-    Index oluştur.
-    */
+     * Daha önce açılmışsa RAM'den kullan.
+     */
+
+    if (
+        sheetCache.has(
+            sheetName
+        )
+    ) {
+
+        const data =
+            sheetCache.get(
+                sheetName
+            );
+
+        applySheet(
+            data
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Sheet bilgisini bul.
+     */
+
+    const info =
+        sheetList.find(
+            sheet =>
+                sheet.name ===
+                sheetName
+        );
+
+
+    if (!info) {
+        return;
+    }
+
+
+    /*
+     * Yükleme göstergesi.
+     */
+
+    loadingText.textContent =
+        sheetName +
+        " yükleniyor...";
+
+    loading.classList.remove(
+        "hidden"
+    );
+
+
+    /*
+     * İlgili JSON'u indir.
+     */
+
+    try {
+
+        const response =
+            await fetch(
+                DATA_PATH +
+                info.file,
+                {
+                    cache: "default"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                info.file +
+                " bulunamadı."
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        /*
+         * Cache.
+         */
+
+        sheetCache.set(
+            sheetName,
+            data
+        );
+
+
+        /*
+         * Eğer kullanıcı bu sırada
+         * başka sheet'e geçtiyse
+         * eski sonucu gösterme.
+         */
+
+        if (
+            currentSheet !==
+            sheetName
+        ) {
+
+            return;
+
+        }
+
+
+        applySheet(
+            data
+        );
+
+
+        loading.classList.add(
+            "hidden"
+        );
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        loadingText.textContent =
+            "Sheet yüklenemedi: " +
+            error.message;
+
+    }
+
+}
+
+
+/* =====================================================
+   SHEET UYGULA
+===================================================== */
+
+function applySheet(
+    data
+) {
+
+    headers =
+        data.headers || [];
+
+    rows =
+        data.rows || [];
+
+
+    /*
+     * Index oluştur.
+     */
 
     indexes =
         new Array(
             rows.length
         );
+
 
     for (
         let i = 0;
@@ -666,15 +919,15 @@ function openSheet(name) {
 
 
     /*
-    Sütun genişliklerini hesapla.
-    */
+     * Sütun genişlikleri.
+     */
 
     calculateWidths();
 
 
     /*
-    Scroll başa.
-    */
+     * Scroll başa.
+     */
 
     wrapper.scrollTop = 0;
 
@@ -682,26 +935,20 @@ function openSheet(name) {
 
 
     /*
-    Tabloyu oluştur.
-    */
+     * Tablo.
+     */
 
     createTable();
 
-
-    /*
-    Aktif sekmeyi güncelle.
-    */
-
-    createSheetTabs();
 
     updateStatus();
 
 }
 
 
-/* =========================================
+/* =====================================================
    SÜTUN GENİŞLİKLERİ
-========================================= */
+===================================================== */
 
 function calculateWidths() {
 
@@ -709,17 +956,18 @@ function calculateWidths() {
         headers.map(
             (header, column) => {
 
-                let length =
+                let maxLength =
                     String(
                         header ?? ""
                     ).length;
 
 
                 /*
-                İlk 100 satır örneklenir.
-                */
+                 * Tüm 19.000 satırı taramak yerine
+                 * ilk 100 satırdan tahmin ediyoruz.
+                 */
 
-                const max =
+                const sampleSize =
                     Math.min(
                         rows.length,
                         100
@@ -728,7 +976,7 @@ function calculateWidths() {
 
                 for (
                     let i = 0;
-                    i < max;
+                    i < sampleSize;
                     i++
                 ) {
 
@@ -737,27 +985,41 @@ function calculateWidths() {
                             column
                         ];
 
+
                     if (
                         value !== undefined &&
                         value !== null
                     ) {
 
-                        length =
-                            Math.max(
-                                length,
-                                String(
-                                    value
-                                ).length
-                            );
+                        const length =
+                            String(
+                                value
+                            ).length;
+
+
+                        if (
+                            length >
+                            maxLength
+                        ) {
+
+                            maxLength =
+                                length;
+
+                        }
 
                     }
 
                 }
 
 
+                /*
+                 * Minimum 80px
+                 * Maximum 400px
+                 */
+
                 return Math.min(
                     Math.max(
-                        length * 8 + 25,
+                        maxLength * 8 + 24,
                         80
                     ),
                     400
@@ -769,9 +1031,9 @@ function calculateWidths() {
 }
 
 
-/* =========================================
-   TABLO
-========================================= */
+/* =====================================================
+   TABLO OLUŞTUR
+===================================================== */
 
 function createTable() {
 
@@ -779,8 +1041,8 @@ function createTable() {
 
 
     /*
-    HEADER
-    */
+     * HEADER
+     */
 
     const header =
         document.createElement(
@@ -788,32 +1050,36 @@ function createTable() {
         );
 
     header.className =
-        "header-row-table";
+        "table-header";
 
 
-    headers.forEach(
-        (value, i) => {
+    for (
+        let i = 0;
+        i < headers.length;
+        i++
+    ) {
 
-            const cell =
-                document.createElement(
-                    "div"
-                );
-
-            cell.className =
-                "header-cell";
-
-            cell.style.width =
-                widths[i] + "px";
-
-            cell.textContent =
-                value ?? "";
-
-            header.appendChild(
-                cell
+        const cell =
+            document.createElement(
+                "div"
             );
 
-        }
-    );
+        cell.className =
+            "header-cell";
+
+        cell.style.width =
+            widths[i] +
+            "px";
+
+        cell.textContent =
+            headers[i] ?? "";
+
+
+        header.appendChild(
+            cell
+        );
+
+    }
 
 
     table.appendChild(
@@ -822,8 +1088,8 @@ function createTable() {
 
 
     /*
-    SATIR ALANI
-    */
+     * VIRTUAL ROW CONTAINER
+     */
 
     const rowsContainer =
         document.createElement(
@@ -837,7 +1103,8 @@ function createTable() {
         (
             indexes.length *
             ROW_HEIGHT
-        ) + "px";
+        ) +
+        "px";
 
 
     table.appendChild(
@@ -845,38 +1112,40 @@ function createTable() {
     );
 
 
-    /*
-    Scroll.
-    */
-
-    wrapper.onscroll =
-        scheduleRender;
-
-
     render();
 
 }
 
 
-/* =========================================
+/* =====================================================
    VIRTUAL SCROLL
-========================================= */
+===================================================== */
+
+wrapper.addEventListener(
+    "scroll",
+    scheduleRender,
+    {
+        passive: true
+    }
+);
+
 
 function scheduleRender() {
 
     if (
-        animationFrame !== null
+        renderFrame !== null
     ) {
 
         return;
 
     }
 
-    animationFrame =
+
+    renderFrame =
         requestAnimationFrame(
             () => {
 
-                animationFrame =
+                renderFrame =
                     null;
 
                 render();
@@ -887,6 +1156,10 @@ function scheduleRender() {
 }
 
 
+/* =====================================================
+   RENDER
+===================================================== */
+
 function render() {
 
     const container =
@@ -894,54 +1167,60 @@ function render() {
             ".rows"
         );
 
+
     if (!container) {
         return;
     }
 
 
-    const top =
+    const scrollTop =
         wrapper.scrollTop;
 
-    const height =
+
+    const viewportHeight =
         wrapper.clientHeight;
 
 
     let start =
         Math.floor(
-            top / ROW_HEIGHT
-        ) - BUFFER;
+            scrollTop /
+            ROW_HEIGHT
+        ) -
+        BUFFER_ROWS;
 
 
     let end =
         Math.ceil(
             (
-                top +
-                height
+                scrollTop +
+                viewportHeight
             ) /
             ROW_HEIGHT
-        ) + BUFFER;
+        ) +
+        BUFFER_ROWS;
 
 
     start =
         Math.max(
-            start,
-            0
+            0,
+            start
         );
 
 
     end =
         Math.min(
-            end,
-            indexes.length
+            indexes.length,
+            end
         );
 
 
+    /*
+     * Sadece görünür satırları
+     * DOM'a koyuyoruz.
+     */
+
     container.innerHTML = "";
 
-
-    /*
-    SADECE GÖRÜNEN SATIRLAR
-    */
 
     for (
         let i = start;
@@ -952,7 +1231,8 @@ function render() {
         const originalIndex =
             indexes[i];
 
-        const rowData =
+
+        const data =
             rows[
                 originalIndex
             ];
@@ -966,17 +1246,19 @@ function render() {
         row.className =
             "row";
 
+
         row.style.top =
             (
                 i *
                 ROW_HEIGHT
-            ) + "px";
+            ) +
+            "px";
 
 
         for (
-            let c = 0;
-            c < headers.length;
-            c++
+            let column = 0;
+            column < headers.length;
+            column++
         ) {
 
             const cell =
@@ -987,11 +1269,17 @@ function render() {
             cell.className =
                 "cell";
 
+
             cell.style.width =
-                widths[c] + "px";
+                widths[column] +
+                "px";
+
 
             cell.textContent =
-                rowData?.[c] ?? "";
+                data?.[
+                    column
+                ] ?? "";
+
 
             row.appendChild(
                 cell
@@ -1009,47 +1297,42 @@ function render() {
 }
 
 
-/* =========================================
+/* =====================================================
    ARAMA
-========================================= */
+===================================================== */
 
 search.addEventListener(
     "input",
-    function () {
+    () => {
 
         clearTimeout(
             searchTimer
         );
 
-        const query =
-            this.value
-                .trim()
-                .toLocaleLowerCase(
-                    "tr-TR"
-                );
-
 
         searchTimer =
             setTimeout(
-                () => {
-
-                    filter(
-                        query
-                    );
-
-                },
-                150
+                performSearch,
+                180
             );
 
     }
 );
 
 
-/* =========================================
-   FİLTRE
-========================================= */
+function performSearch() {
 
-function filter(query) {
+    const query =
+        search.value
+            .trim()
+            .toLocaleLowerCase(
+                "tr-TR"
+            );
+
+
+    /*
+     * Arama boşsa tüm satırlar.
+     */
 
     if (!query) {
 
@@ -1057,6 +1340,7 @@ function filter(query) {
             new Array(
                 rows.length
             );
+
 
         for (
             let i = 0;
@@ -1069,10 +1353,15 @@ function filter(query) {
         }
 
     }
+
     else {
 
         const result = [];
 
+
+        /*
+         * Aktif sheet'te ara.
+         */
 
         for (
             let i = 0;
@@ -1084,6 +1373,10 @@ function filter(query) {
                 rows[i];
 
 
+            let found =
+                false;
+
+
             for (
                 let c = 0;
                 c < row.length;
@@ -1091,26 +1384,33 @@ function filter(query) {
             ) {
 
                 const value =
-                    row[c];
-
-
-                if (
                     String(
-                        value ?? ""
+                        row[c] ?? ""
                     )
                     .toLocaleLowerCase(
                         "tr-TR"
-                    )
-                    .includes(
+                    );
+
+
+                if (
+                    value.includes(
                         query
                     )
                 ) {
 
-                    result.push(i);
+                    found =
+                        true;
 
                     break;
 
                 }
+
+            }
+
+
+            if (found) {
+
+                result.push(i);
 
             }
 
@@ -1123,8 +1423,16 @@ function filter(query) {
     }
 
 
+    /*
+     * Scroll başa.
+     */
+
     wrapper.scrollTop = 0;
 
+
+    /*
+     * Container yüksekliği.
+     */
 
     const container =
         table.querySelector(
@@ -1138,7 +1446,8 @@ function filter(query) {
             (
                 indexes.length *
                 ROW_HEIGHT
-            ) + "px";
+            ) +
+            "px";
 
     }
 
@@ -1150,62 +1459,79 @@ function filter(query) {
 }
 
 
-/* =========================================
+/* =====================================================
    STATUS
-========================================= */
+===================================================== */
 
 function updateStatus() {
 
     status.textContent =
         currentSheet +
         " • " +
-        indexes.length.toLocaleString(
-            "tr-TR"
+        formatNumber(
+            indexes.length
         ) +
         " / " +
-        rows.length.toLocaleString(
-            "tr-TR"
+        formatNumber(
+            rows.length
         );
 
 }
 
 
-/* =========================================
+function formatNumber(
+    number
+) {
+
+    return Number(
+        number
+    ).toLocaleString(
+        "tr-TR"
+    );
+
+}
+
+
+/* =====================================================
    ESCAPE
-========================================= */
+===================================================== */
 
-function escapeHtml(value) {
+function escapeHtml(
+    value
+) {
 
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+    return String(
+        value
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
 }
 
 
-/* =========================================
+/* =====================================================
    BAŞLAT
-========================================= */
+===================================================== */
 
-loadData();
+init();
 
 </script>
 
