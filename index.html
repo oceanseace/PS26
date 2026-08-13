@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Excel Verileri</title>
+
+  <!-- SheetJS -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    input {
+      flex: 1;
+      min-width: 250px;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #24292f;
+      color: white;
+      font-size: 14px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      overflow: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-height: 75vh;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 700px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #ddd;
+      border-right: 1px solid #eee;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #24292f;
+      color: white;
+      z-index: 1;
+    }
+
+    tr:hover td {
+      background: #f5f5f5;
+    }
+
+    #status {
+      margin: 10px 0;
+      color: #666;
+    }
+
+    .error {
+      color: #b00020;
+      background: #ffecec;
+      padding: 12px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>Excel Verileri</h1>
+
+    <div class="toolbar">
+      <input
+        type="text"
+        id="search"
+        placeholder="Tabloda ara..."
+      >
+
+      <button onclick="downloadExcel()">
+        Excel'i İndir
+      </button>
+    </div>
+
+    <div id="status">Excel dosyası yükleniyor...</div>
+
+    <div class="table-container">
+      <div id="table"></div>
+    </div>
+
+  </div>
+
+  <script>
+
+    let workbook;
+    let originalData = [];
+
+    // Excel dosyasını yükle
+    fetch("data.xlsx")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("data.xlsx bulunamadı.");
+        }
+
+        return response.arrayBuffer();
+      })
+      .then(data => {
+
+        workbook = XLSX.read(data, {
+          type: "array"
+        });
+
+        // İlk sheet'i al
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        // Excel → JSON
+        originalData = XLSX.utils.sheet_to_json(
+          worksheet,
+          {
+            header: 1,
+            defval: ""
+          }
+        );
+
+        renderTable(originalData);
+
+        document.getElementById("status").textContent =
+          `${firstSheetName} yüklendi • ${Math.max(originalData.length - 1, 0)} satır`;
+
+      })
+      .catch(error => {
+
+        document.getElementById("status").innerHTML =
+          `<div class="error">
+            Excel yüklenemedi: ${error.message}
+          </div>`;
+
+      });
+
+
+    // Tabloyu oluştur
+    function renderTable(data) {
+
+      if (!data.length) {
+        document.getElementById("table").innerHTML =
+          "<p>Excel dosyasında veri bulunamadı.</p>";
+        return;
+      }
+
+      let html = "<table>";
+
+      // Başlık
+      html += "<thead><tr>";
+
+      data[0].forEach(cell => {
+        html += `<th>${escapeHtml(cell)}</th>`;
+      });
+
+      html += "</tr></thead>";
+
+      // Satırlar
+      html += "<tbody>";
+
+      data.slice(1).forEach(row => {
+
+        html += "<tr>";
+
+        for (let i = 0; i < data[0].length; i++) {
+
+          const value = row[i] ?? "";
+
+          html += `<td>${escapeHtml(value)}</td>`;
+        }
+
+        html += "</tr>";
+
+      });
+
+      html += "</tbody>";
+      html += "</table>";
+
+      document.getElementById("table").innerHTML = html;
+    }
+
+
+    // Arama
+    document.getElementById("search").addEventListener(
+      "input",
+      function () {
+
+        const searchText = this.value
+          .toLowerCase()
+          .trim();
+
+        if (!searchText) {
+          renderTable(originalData);
+          return;
+        }
+
+        const header = originalData[0];
+
+        const filteredRows = originalData
+          .slice(1)
+          .filter(row =>
+            row.some(cell =>
+              String(cell)
+                .toLowerCase()
+                .includes(searchText)
+            )
+          );
+
+        renderTable([
+          header,
+          ...filteredRows
+        ]);
+      }
+    );
+
+
+    // Excel'i indir
+    function downloadExcel() {
+
+      const link = document.createElement("a");
+
+      link.href = "data.xlsx";
+      link.download = "data.xlsx";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+
+    // HTML güvenliği
+    function escapeHtml(value) {
+
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+  </script>
+
+</body>
+</html>
