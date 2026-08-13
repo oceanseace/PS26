@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Excel Verileri</title>
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<title>Veriler</title>
 
 <style>
 * {
@@ -21,7 +19,6 @@ body {
     height: 100%;
     font-family: Arial, sans-serif;
     background: #f5f6f8;
-    color: #222;
 }
 
 body {
@@ -34,13 +31,16 @@ body {
     flex-direction: column;
 }
 
-/* HEADER */
+
+/* =========================================
+   HEADER
+========================================= */
 
 .header {
-    flex-shrink: 0;
     background: #24292f;
     color: white;
-    padding: 14px 18px;
+    padding: 13px 16px;
+    flex-shrink: 0;
 }
 
 .header-row {
@@ -50,7 +50,7 @@ body {
 }
 
 .title {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 600;
     flex: 1;
 }
@@ -60,56 +60,148 @@ body {
     opacity: .8;
 }
 
-/* TOOLBAR */
 
-.toolbar {
-    flex-shrink: 0;
+/* =========================================
+   SHEET TABS
+========================================= */
+
+.sheet-tabs {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
     background: white;
     border-bottom: 1px solid #ddd;
-    padding: 10px;
+    padding: 7px 9px;
+    flex-shrink: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.sheet-tabs button {
+    border: none;
+    background: #eeeeee;
+    color: #333;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.sheet-tabs button:hover {
+    background: #ddd;
+}
+
+.sheet-tabs button.active {
+    background: #24292f;
+    color: white;
+}
+
+
+/* =========================================
+   TOOLBAR
+========================================= */
+
+.toolbar {
+    background: white;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
     display: flex;
     gap: 8px;
-    align-items: center;
+    flex-shrink: 0;
 }
 
 .search {
     flex: 1;
     min-width: 0;
-    padding: 10px 13px;
     border: 1px solid #ccc;
     border-radius: 7px;
+    padding: 10px 13px;
     font-size: 15px;
     outline: none;
 }
 
 .search:focus {
-    border-color: #777;
+    border-color: #555;
 }
 
-.button {
-    border: none;
+
+/* =========================================
+   TABLE
+========================================= */
+
+.table-wrapper {
+    flex: 1;
+    overflow: auto;
+    background: white;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    position: relative;
+    min-width: max-content;
+}
+
+.header-row-table {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
     background: #24292f;
     color: white;
-    border-radius: 7px;
-    padding: 10px 14px;
-    cursor: pointer;
+}
+
+.header-cell {
+    flex-shrink: 0;
+    height: 42px;
+    padding: 11px 12px;
+    border-right: 1px solid #555;
+    font-weight: bold;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.button:active {
-    transform: scale(.98);
+.rows {
+    position: relative;
 }
 
-/* LOADING */
+.row {
+    position: absolute;
+    left: 0;
+    display: flex;
+    height: 42px;
+}
+
+.cell {
+    flex-shrink: 0;
+    height: 42px;
+    padding: 11px 12px;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    background: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.row:nth-child(even) .cell {
+    background: #fafafa;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
 
 .loading {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    background: rgba(255,255,255,.96);
+    background: white;
     z-index: 100;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     flex-direction: column;
     gap: 15px;
 }
@@ -119,106 +211,38 @@ body {
 }
 
 .spinner {
-    width: 38px;
-    height: 38px;
+    width: 35px;
+    height: 35px;
     border: 4px solid #ddd;
     border-top-color: #24292f;
     border-radius: 50%;
-    animation: spin .8s linear infinite;
+    animation: spin .7s linear infinite;
 }
 
 @keyframes spin {
+
     to {
         transform: rotate(360deg);
     }
+
 }
 
-.loading-text {
-    font-size: 15px;
-    color: #555;
-}
 
-/* TABLE */
-
-.table-wrapper {
-    flex: 1;
-    position: relative;
-    overflow: auto;
-    background: white;
-    -webkit-overflow-scrolling: touch;
-}
-
-.virtual-table {
-    position: relative;
-    min-width: max-content;
-}
-
-.table-header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    background: #24292f;
-    color: white;
-}
-
-.header-cell {
-    flex-shrink: 0;
-    padding: 11px 12px;
-    border-right: 1px solid #555;
-    border-bottom: 1px solid #111;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.rows-container {
-    position: relative;
-}
-
-.row {
-    position: absolute;
-    left: 0;
-    height: 42px;
-    display: flex;
-    width: max-content;
-}
-
-.cell {
-    flex-shrink: 0;
-    height: 42px;
-    padding: 11px 12px;
-    border-right: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    background: white;
-}
-
-.row:nth-child(even) .cell {
-    background: #fafafa;
-}
-
-.cell:hover {
-    background: #f0f0f0 !important;
-}
-
-/* ERROR */
+/* =========================================
+   ERROR
+========================================= */
 
 .error {
-    padding: 20px;
+    padding: 25px;
     color: #a00000;
 }
 
-/* MOBILE */
+
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 600px) {
-
-    .header {
-        padding: 11px 12px;
-    }
 
     .title {
         font-size: 17px;
@@ -228,39 +252,57 @@ body {
         font-size: 11px;
     }
 
-    .toolbar {
-        padding: 8px;
+    .sheet-tabs button {
+        padding: 8px 12px;
     }
 
-    .button {
-        padding: 10px;
-        font-size: 13px;
-    }
-
-    .cell,
-    .header-cell {
+    .header-cell,
+    .cell {
         padding-left: 9px;
         padding-right: 9px;
     }
+
 }
 </style>
 </head>
+
 
 <body>
 
 <div class="app">
 
+
+    <!-- HEADER -->
+
     <div class="header">
+
         <div class="header-row">
+
             <div class="title">
-                Excel Verileri
+                Veriler
             </div>
 
-            <div id="status" class="status">
-                Hazırlanıyor...
+            <div
+                id="status"
+                class="status"
+            >
+                Yükleniyor...
             </div>
+
         </div>
+
     </div>
+
+
+    <!-- SHEET TABS -->
+
+    <div
+        id="sheetTabs"
+        class="sheet-tabs"
+    ></div>
+
+
+    <!-- SEARCH -->
 
     <div class="toolbar">
 
@@ -268,31 +310,31 @@ body {
             id="search"
             class="search"
             type="search"
-            placeholder="Tabloda ara..."
+            placeholder="Bu sayfada ara..."
             autocomplete="off"
         >
 
-        <button
-            id="download"
-            class="button"
-        >
-            Excel
-        </button>
-
     </div>
+
+
+    <!-- TABLE -->
 
     <div
         id="tableWrapper"
         class="table-wrapper"
     >
+
         <div
-            id="virtualTable"
-            class="virtual-table"
+            id="table"
+            class="table"
         ></div>
+
     </div>
 
 </div>
 
+
+<!-- LOADING -->
 
 <div
     id="loading"
@@ -301,11 +343,8 @@ body {
 
     <div class="spinner"></div>
 
-    <div
-        id="loadingText"
-        class="loading-text"
-    >
-        Excel yükleniyor...
+    <div id="loadingText">
+        Veriler yükleniyor...
     </div>
 
 </div>
@@ -315,209 +354,194 @@ body {
 
 "use strict";
 
-/*
-====================================================
-AYARLAR
-====================================================
-*/
 
-const FILE = "data.xlsx";
+/* =========================================
+   AYARLAR
+========================================= */
+
+const DATA_FILE = "data.json";
+
+const DEFAULT_SHEET = "TICKET";
 
 const ROW_HEIGHT = 42;
 
-const BUFFER_ROWS = 8;
-
-const DEFAULT_COLUMN_WIDTH = 150;
-
-const MIN_COLUMN_WIDTH = 80;
-
-const MAX_COLUMN_WIDTH = 400;
+const BUFFER = 10;
 
 
-/*
-====================================================
-GLOBAL VERİ
-====================================================
-*/
+/* =========================================
+   GLOBAL
+========================================= */
 
-let workbook = null;
+let sheets = {};
 
-let data = [];
+let currentSheet = "";
+
+let rows = [];
 
 let headers = [];
 
-let filteredIndexes = [];
+let indexes = [];
 
-let columnWidths = [];
+let widths = [];
 
-let rafId = null;
+let animationFrame = null;
+
+let searchTimer = null;
 
 
-/*
-====================================================
-ELEMENTLER
-====================================================
-*/
+/* =========================================
+   ELEMENTLER
+========================================= */
 
 const loading =
-    document.getElementById("loading");
+    document.getElementById(
+        "loading"
+    );
 
 const loadingText =
-    document.getElementById("loadingText");
+    document.getElementById(
+        "loadingText"
+    );
 
 const status =
-    document.getElementById("status");
+    document.getElementById(
+        "status"
+    );
 
-const tableWrapper =
-    document.getElementById("tableWrapper");
+const wrapper =
+    document.getElementById(
+        "tableWrapper"
+    );
 
-const virtualTable =
-    document.getElementById("virtualTable");
+const table =
+    document.getElementById(
+        "table"
+    );
 
 const search =
-    document.getElementById("search");
+    document.getElementById(
+        "search"
+    );
 
-const download =
-    document.getElementById("download");
-
-
-/*
-====================================================
-LOADING TEXT
-====================================================
-*/
-
-function setLoading(text) {
-
-    loadingText.textContent = text;
-
-}
+const sheetTabs =
+    document.getElementById(
+        "sheetTabs"
+    );
 
 
-/*
-====================================================
-EXCEL YÜKLE
-====================================================
-*/
+/* =========================================
+   VERİYİ YÜKLE
+========================================= */
 
-async function loadExcel() {
+async function loadData() {
 
     try {
 
-        setLoading("Excel dosyası indiriliyor...");
+        loadingText.textContent =
+            "Veriler yükleniyor...";
 
         const response =
-            await fetch(FILE, {
-                cache: "default"
-            });
-
-        if (!response.ok) {
-            throw new Error(
-                "data.xlsx bulunamadı (" +
-                response.status +
-                ")"
-            );
-        }
-
-        const contentLength =
-            response.headers.get(
-                "content-length"
-            );
-
-        const total =
-            Number(contentLength) || 0;
-
-        const reader =
-            response.body.getReader();
-
-        const chunks = [];
-
-        let received = 0;
-
-        while (true) {
-
-            const { done, value } =
-                await reader.read();
-
-            if (done) break;
-
-            chunks.push(value);
-
-            received += value.length;
-
-            if (total) {
-
-                const percent =
-                    Math.round(
-                        received / total * 100
-                    );
-
-                setLoading(
-                    "Excel indiriliyor: " +
-                    percent +
-                    "%"
-                );
-
-            }
-
-        }
-
-        const buffer =
-            new Uint8Array(received);
-
-        let offset = 0;
-
-        for (const chunk of chunks) {
-
-            buffer.set(
-                chunk,
-                offset
-            );
-
-            offset += chunk.length;
-
-        }
-
-        /*
-        Bellekte gereksiz kopyaları
-        mümkün olduğunca azalt.
-        */
-
-        chunks.length = 0;
-
-        setLoading(
-            "Excel okunuyor..."
-        );
-
-        /*
-        XLSX parse işlemi ağır olabilir.
-        */
-
-        await new Promise(
-            resolve => setTimeout(
-                resolve,
-                20
-            )
-        );
-
-        workbook =
-            XLSX.read(
-                buffer,
+            await fetch(
+                DATA_FILE,
                 {
-                    type: "array",
-                    cellDates: true,
-                    cellNF: false,
-                    cellStyles: false
+                    cache: "default"
                 }
             );
 
+        if (!response.ok) {
+
+            throw new Error(
+                "data.json bulunamadı."
+            );
+
+        }
+
+        const json =
+            await response.json();
+
+
         /*
-        Buffer artık gerekmiyor.
+        Beklenen yapı:
+
+        {
+            "sheets": {
+
+                "TICKET": {
+                    "headers": [],
+                    "rows": []
+                },
+
+                "SUMMARY": {
+                    "headers": [],
+                    "rows": []
+                }
+
+            }
+        }
         */
 
-        buffer.fill(0);
+        if (
+            !json.sheets
+        ) {
 
-        processFirstSheet();
+            throw new Error(
+                "data.json içinde 'sheets' bulunamadı."
+            );
+
+        }
+
+        sheets =
+            json.sheets;
+
+
+        const names =
+            Object.keys(
+                sheets
+            );
+
+
+        if (!names.length) {
+
+            throw new Error(
+                "Hiç sheet bulunamadı."
+            );
+
+        }
+
+
+        /*
+        TICKET varsa onu aç.
+        Yoksa ilk sheet.
+        */
+
+        if (
+            sheets[
+                DEFAULT_SHEET
+            ]
+        ) {
+
+            currentSheet =
+                DEFAULT_SHEET;
+
+        }
+        else {
+
+            currentSheet =
+                names[0];
+
+        }
+
+
+        createSheetTabs();
+
+        openSheet(
+            currentSheet
+        );
+
+
+        loading.classList.add(
+            "hidden"
+        );
 
     }
     catch (error) {
@@ -526,9 +550,11 @@ async function loadExcel() {
 
         loading.innerHTML =
             `<div class="error">
-                <strong>Excel yüklenemedi.</strong>
+                <strong>Veriler yüklenemedi.</strong>
                 <br><br>
-                ${escapeHtml(error.message)}
+                ${escapeHtml(
+                    error.message
+                )}
             </div>`;
 
     }
@@ -536,142 +562,179 @@ async function loadExcel() {
 }
 
 
-/*
-====================================================
-İLK SHEET
-====================================================
-*/
+/* =========================================
+   SHEET SEKMELELERİ
+========================================= */
 
-function processFirstSheet() {
+function createSheetTabs() {
 
-    const sheetName =
-        workbook.SheetNames[0];
+    sheetTabs.innerHTML = "";
 
-    const sheet =
-        workbook.Sheets[sheetName];
+    Object.keys(
+        sheets
+    ).forEach(
+        name => {
 
-    setLoading(
-        "Tablo hazırlanıyor..."
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.textContent =
+                name;
+
+            if (
+                name ===
+                currentSheet
+            ) {
+
+                button.classList.add(
+                    "active"
+                );
+
+            }
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    openSheet(
+                        name
+                    );
+
+                }
+            );
+
+            sheetTabs.appendChild(
+                button
+            );
+
+        }
     );
 
+}
+
+
+/* =========================================
+   SHEET AÇ
+========================================= */
+
+function openSheet(name) {
+
+    const sheet =
+        sheets[name];
+
+    if (!sheet) {
+        return;
+    }
+
+    currentSheet =
+        name;
+
+    headers =
+        sheet.headers || [];
+
+    rows =
+        sheet.rows || [];
+
+
     /*
-    header:1 kullanıyoruz.
-    Böylece object üretmek yerine
-    doğrudan array kullanıyoruz.
+    Aramayı temizle.
     */
 
-    data =
-        XLSX.utils.sheet_to_json(
-            sheet,
-            {
-                header: 1,
-                defval: "",
-                raw: true
-            }
-        );
+    search.value = "";
+
 
     /*
-    Workbook artık gerekmiyor.
+    Index oluştur.
     */
 
-    workbook = null;
-
-    if (!data.length) {
-
-        throw new Error(
-            "Excel dosyasında veri bulunamadı."
+    indexes =
+        new Array(
+            rows.length
         );
+
+    for (
+        let i = 0;
+        i < rows.length;
+        i++
+    ) {
+
+        indexes[i] = i;
 
     }
 
-    headers =
-        data[0] || [];
 
     /*
     Sütun genişliklerini hesapla.
     */
 
-    calculateColumnWidths();
+    calculateWidths();
+
 
     /*
-    Satır indexlerini oluştur.
+    Scroll başa.
     */
 
-    filteredIndexes =
-        new Array(
-            Math.max(
-                data.length - 1,
-                0
-            )
-        );
+    wrapper.scrollTop = 0;
 
-    for (
-        let i = 0;
-        i < filteredIndexes.length;
-        i++
-    ) {
+    wrapper.scrollLeft = 0;
 
-        filteredIndexes[i] =
-            i + 1;
-
-    }
 
     /*
-    Tablo yüksekliği.
+    Tabloyu oluştur.
     */
 
-    buildTable();
+    createTable();
+
 
     /*
-    Yükleme ekranını kapat.
+    Aktif sekmeyi güncelle.
     */
 
-    loading.classList.add(
-        "hidden"
-    );
+    createSheetTabs();
 
     updateStatus();
 
 }
 
 
-/*
-====================================================
-SÜTUN GENİŞLİĞİ
-====================================================
-*/
+/* =========================================
+   SÜTUN GENİŞLİKLERİ
+========================================= */
 
-function calculateColumnWidths() {
+function calculateWidths() {
 
-    columnWidths =
+    widths =
         headers.map(
-            (header, columnIndex) => {
+            (header, column) => {
 
-                let maxLength =
+                let length =
                     String(
                         header ?? ""
                     ).length;
 
+
                 /*
-                İlk 100 satırı kontrol et.
-                Tüm Excel'i taramak gereksiz.
+                İlk 100 satır örneklenir.
                 */
 
-                const sampleCount =
+                const max =
                     Math.min(
-                        data.length,
-                        101
+                        rows.length,
+                        100
                     );
 
+
                 for (
-                    let r = 1;
-                    r < sampleCount;
-                    r++
+                    let i = 0;
+                    i < max;
+                    i++
                 ) {
 
                     const value =
-                        data[r]?.[
-                            columnIndex
+                        rows[i]?.[
+                            column
                         ];
 
                     if (
@@ -679,9 +742,9 @@ function calculateColumnWidths() {
                         value !== null
                     ) {
 
-                        maxLength =
+                        length =
                             Math.max(
-                                maxLength,
+                                length,
                                 String(
                                     value
                                 ).length
@@ -691,22 +754,14 @@ function calculateColumnWidths() {
 
                 }
 
-                let width =
-                    maxLength * 8 + 24;
 
-                width =
+                return Math.min(
                     Math.max(
-                        width,
-                        MIN_COLUMN_WIDTH
-                    );
-
-                width =
-                    Math.min(
-                        width,
-                        MAX_COLUMN_WIDTH
-                    );
-
-                return width;
+                        length * 8 + 25,
+                        80
+                    ),
+                    400
+                );
 
             }
         );
@@ -714,30 +769,30 @@ function calculateColumnWidths() {
 }
 
 
-/*
-====================================================
-TABLOYU OLUŞTUR
-====================================================
-*/
+/* =========================================
+   TABLO
+========================================= */
 
-function buildTable() {
+function createTable() {
 
-    virtualTable.innerHTML = "";
+    table.innerHTML = "";
+
 
     /*
     HEADER
     */
 
-    const tableHeader =
+    const header =
         document.createElement(
             "div"
         );
 
-    tableHeader.className =
-        "table-header";
+    header.className =
+        "header-row-table";
+
 
     headers.forEach(
-        (header, index) => {
+        (value, i) => {
 
             const cell =
                 document.createElement(
@@ -748,21 +803,21 @@ function buildTable() {
                 "header-cell";
 
             cell.style.width =
-                columnWidths[index] +
-                "px";
+                widths[i] + "px";
 
             cell.textContent =
-                header ?? "";
+                value ?? "";
 
-            tableHeader.appendChild(
+            header.appendChild(
                 cell
             );
 
         }
     );
 
-    virtualTable.appendChild(
-        tableHeader
+
+    table.appendChild(
+        header
     );
 
 
@@ -776,55 +831,55 @@ function buildTable() {
         );
 
     rowsContainer.className =
-        "rows-container";
+        "rows";
 
     rowsContainer.style.height =
         (
-            filteredIndexes.length *
+            indexes.length *
             ROW_HEIGHT
         ) + "px";
 
-    virtualTable.appendChild(
+
+    table.appendChild(
         rowsContainer
     );
 
 
     /*
-    Scroll olayını bağla.
+    Scroll.
     */
 
-    tableWrapper.addEventListener(
-        "scroll",
-        scheduleRender,
-        {
-            passive: true
-        }
-    );
+    wrapper.onscroll =
+        scheduleRender;
 
-    renderVisibleRows();
+
+    render();
 
 }
 
 
-/*
-====================================================
-VIRTUAL SCROLL
-====================================================
-*/
+/* =========================================
+   VIRTUAL SCROLL
+========================================= */
 
 function scheduleRender() {
 
-    if (rafId !== null) {
+    if (
+        animationFrame !== null
+    ) {
+
         return;
+
     }
 
-    rafId =
+    animationFrame =
         requestAnimationFrame(
             () => {
 
-                rafId = null;
+                animationFrame =
+                    null;
 
-                renderVisibleRows();
+                render();
 
             }
         );
@@ -832,45 +887,40 @@ function scheduleRender() {
 }
 
 
-/*
-====================================================
-SADECE GÖRÜNEN SATIRLAR
-====================================================
-*/
+function render() {
 
-function renderVisibleRows() {
-
-    const rowsContainer =
-        virtualTable.querySelector(
-            ".rows-container"
+    const container =
+        table.querySelector(
+            ".rows"
         );
 
-    if (!rowsContainer) {
+    if (!container) {
         return;
     }
 
-    const scrollTop =
-        tableWrapper.scrollTop;
 
-    const viewportHeight =
-        tableWrapper.clientHeight;
+    const top =
+        wrapper.scrollTop;
+
+    const height =
+        wrapper.clientHeight;
+
 
     let start =
         Math.floor(
-            scrollTop /
-            ROW_HEIGHT
-        ) -
-        BUFFER_ROWS;
+            top / ROW_HEIGHT
+        ) - BUFFER;
+
 
     let end =
         Math.ceil(
             (
-                scrollTop +
-                viewportHeight
+                top +
+                height
             ) /
             ROW_HEIGHT
-        ) +
-        BUFFER_ROWS;
+        ) + BUFFER;
+
 
     start =
         Math.max(
@@ -878,38 +928,35 @@ function renderVisibleRows() {
             0
         );
 
+
     end =
         Math.min(
             end,
-            filteredIndexes.length
+            indexes.length
         );
 
 
-    /*
-    Önce mevcut satırları temizle.
-    */
-
-    rowsContainer.innerHTML = "";
+    container.innerHTML = "";
 
 
     /*
-    Sadece ekranda gereken
-    ~30-60 satırı oluştur.
+    SADECE GÖRÜNEN SATIRLAR
     */
 
     for (
-        let visibleIndex = start;
-        visibleIndex < end;
-        visibleIndex++
+        let i = start;
+        i < end;
+        i++
     ) {
 
-        const dataIndex =
-            filteredIndexes[
-                visibleIndex
-            ];
+        const originalIndex =
+            indexes[i];
 
         const rowData =
-            data[dataIndex] || [];
+            rows[
+                originalIndex
+            ];
+
 
         const row =
             document.createElement(
@@ -921,15 +968,15 @@ function renderVisibleRows() {
 
         row.style.top =
             (
-                visibleIndex *
+                i *
                 ROW_HEIGHT
             ) + "px";
 
 
         for (
-            let columnIndex = 0;
-            columnIndex < headers.length;
-            columnIndex++
+            let c = 0;
+            c < headers.length;
+            c++
         ) {
 
             const cell =
@@ -941,17 +988,10 @@ function renderVisibleRows() {
                 "cell";
 
             cell.style.width =
-                columnWidths[
-                    columnIndex
-                ] + "px";
-
-            const value =
-                rowData[
-                    columnIndex
-                ];
+                widths[c] + "px";
 
             cell.textContent =
-                formatValue(value);
+                rowData?.[c] ?? "";
 
             row.appendChild(
                 cell
@@ -959,7 +999,8 @@ function renderVisibleRows() {
 
         }
 
-        rowsContainer.appendChild(
+
+        container.appendChild(
             row
         );
 
@@ -968,45 +1009,9 @@ function renderVisibleRows() {
 }
 
 
-/*
-====================================================
-DEĞER FORMATLAMA
-====================================================
-*/
-
-function formatValue(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
-    }
-
-    if (
-        value instanceof Date
-    ) {
-
-        return value.toLocaleDateString(
-            "tr-TR"
-        );
-
-    }
-
-    return String(value);
-
-}
-
-
-/*
-====================================================
-ARAMA
-====================================================
-*/
-
-let searchTimer = null;
+/* =========================================
+   ARAMA
+========================================= */
 
 search.addEventListener(
     "input",
@@ -1023,15 +1028,12 @@ search.addEventListener(
                     "tr-TR"
                 );
 
-        /*
-        150ms debounce.
-        */
 
         searchTimer =
             setTimeout(
                 () => {
 
-                    filterData(
+                    filter(
                         query
                     );
 
@@ -1043,32 +1045,26 @@ search.addEventListener(
 );
 
 
-/*
-====================================================
-FİLTRELEME
-====================================================
-*/
+/* =========================================
+   FİLTRE
+========================================= */
 
-function filterData(query) {
+function filter(query) {
 
     if (!query) {
 
-        filteredIndexes =
+        indexes =
             new Array(
-                Math.max(
-                    data.length - 1,
-                    0
-                )
+                rows.length
             );
 
         for (
             let i = 0;
-            i < filteredIndexes.length;
+            i < rows.length;
             i++
         ) {
 
-            filteredIndexes[i] =
-                i + 1;
+            indexes[i] = i;
 
         }
 
@@ -1077,20 +1073,16 @@ function filterData(query) {
 
         const result = [];
 
-        /*
-        Satır satır kontrol.
-        */
 
         for (
-            let i = 1;
-            i < data.length;
+            let i = 0;
+            i < rows.length;
             i++
         ) {
 
             const row =
-                data[i];
+                rows[i];
 
-            let found = false;
 
             for (
                 let c = 0;
@@ -1101,150 +1093,86 @@ function filterData(query) {
                 const value =
                     row[c];
 
+
                 if (
-                    value !== undefined &&
-                    value !== null &&
-                    String(value)
-                        .toLocaleLowerCase(
-                            "tr-TR"
-                        )
-                        .includes(query)
+                    String(
+                        value ?? ""
+                    )
+                    .toLocaleLowerCase(
+                        "tr-TR"
+                    )
+                    .includes(
+                        query
+                    )
                 ) {
 
-                    found = true;
+                    result.push(i);
+
                     break;
 
                 }
 
             }
 
-            if (found) {
-
-                result.push(i);
-
-            }
-
         }
 
-        filteredIndexes =
+
+        indexes =
             result;
 
     }
 
 
-    /*
-    Scroll başa dönsün.
-    */
-
-    tableWrapper.scrollTop = 0;
+    wrapper.scrollTop = 0;
 
 
-    /*
-    Satır yüksekliğini güncelle.
-    */
-
-    const rowsContainer =
-        virtualTable.querySelector(
-            ".rows-container"
+    const container =
+        table.querySelector(
+            ".rows"
         );
 
-    if (rowsContainer) {
 
-        rowsContainer.style.height =
+    if (container) {
+
+        container.style.height =
             (
-                filteredIndexes.length *
+                indexes.length *
                 ROW_HEIGHT
             ) + "px";
 
     }
 
-    renderVisibleRows();
+
+    render();
 
     updateStatus();
 
 }
 
 
-/*
-====================================================
-STATUS
-====================================================
-*/
+/* =========================================
+   STATUS
+========================================= */
 
 function updateStatus() {
 
-    const total =
-        Math.max(
-            data.length - 1,
-            0
+    status.textContent =
+        currentSheet +
+        " • " +
+        indexes.length.toLocaleString(
+            "tr-TR"
+        ) +
+        " / " +
+        rows.length.toLocaleString(
+            "tr-TR"
         );
-
-    const shown =
-        filteredIndexes.length;
-
-    if (shown === total) {
-
-        status.textContent =
-            total.toLocaleString(
-                "tr-TR"
-            ) +
-            " satır";
-
-    }
-    else {
-
-        status.textContent =
-            shown.toLocaleString(
-                "tr-TR"
-            ) +
-            " / " +
-            total.toLocaleString(
-                "tr-TR"
-            );
-
-    }
 
 }
 
 
-/*
-====================================================
-EXCEL İNDİR
-====================================================
-*/
-
-download.addEventListener(
-    "click",
-    function () {
-
-        const link =
-            document.createElement(
-                "a"
-            );
-
-        link.href =
-            FILE;
-
-        link.download =
-            "data.xlsx";
-
-        document.body.appendChild(
-            link
-        );
-
-        link.click();
-
-        link.remove();
-
-    }
-);
-
-
-/*
-====================================================
-HTML ESCAPE
-====================================================
-*/
+/* =========================================
+   ESCAPE
+========================================= */
 
 function escapeHtml(value) {
 
@@ -1273,13 +1201,11 @@ function escapeHtml(value) {
 }
 
 
-/*
-====================================================
-BAŞLAT
-====================================================
-*/
+/* =========================================
+   BAŞLAT
+========================================= */
 
-loadExcel();
+loadData();
 
 </script>
 
