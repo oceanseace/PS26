@@ -1,295 +1,1287 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Excel Verileri</title>
+<title>Excel Verileri</title>
 
-  <!-- SheetJS -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  <style>
-    * {
-      box-sizing: border-box;
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background: #f5f6f8;
+    color: #222;
+}
+
+body {
+    overflow: hidden;
+}
+
+.app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+
+.header {
+    flex-shrink: 0;
+    background: #24292f;
+    color: white;
+    padding: 14px 18px;
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+    flex: 1;
+}
+
+.status {
+    font-size: 13px;
+    opacity: .8;
+}
+
+/* TOOLBAR */
+
+.toolbar {
+    flex-shrink: 0;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.search {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 13px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 15px;
+    outline: none;
+}
+
+.search:focus {
+    border-color: #777;
+}
+
+.button {
+    border: none;
+    background: #24292f;
+    color: white;
+    border-radius: 7px;
+    padding: 10px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.button:active {
+    transform: scale(.98);
+}
+
+/* LOADING */
+
+.loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,.96);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.loading.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 38px;
+    height: 38px;
+    border: 4px solid #ddd;
+    border-top-color: #24292f;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 15px;
+    color: #555;
+}
+
+/* TABLE */
+
+.table-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    background: white;
+    -webkit-overflow-scrolling: touch;
+}
+
+.virtual-table {
+    position: relative;
+    min-width: max-content;
+}
+
+.table-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    background: #24292f;
+    color: white;
+}
+
+.header-cell {
+    flex-shrink: 0;
+    padding: 11px 12px;
+    border-right: 1px solid #555;
+    border-bottom: 1px solid #111;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rows-container {
+    position: relative;
+}
+
+.row {
+    position: absolute;
+    left: 0;
+    height: 42px;
+    display: flex;
+    width: max-content;
+}
+
+.cell {
+    flex-shrink: 0;
+    height: 42px;
+    padding: 11px 12px;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: white;
+}
+
+.row:nth-child(even) .cell {
+    background: #fafafa;
+}
+
+.cell:hover {
+    background: #f0f0f0 !important;
+}
+
+/* ERROR */
+
+.error {
+    padding: 20px;
+    color: #a00000;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .header {
+        padding: 11px 12px;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f6f8;
-      color: #222;
+    .title {
+        font-size: 17px;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    h1 {
-      margin-bottom: 20px;
+    .status {
+        font-size: 11px;
     }
 
     .toolbar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
+        padding: 8px;
     }
 
-    input {
-      flex: 1;
-      min-width: 250px;
-      padding: 10px 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
+    .button {
+        padding: 10px;
+        font-size: 13px;
     }
 
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #24292f;
-      color: white;
-      font-size: 14px;
+    .cell,
+    .header-cell {
+        padding-left: 9px;
+        padding-right: 9px;
     }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .table-container {
-      background: white;
-      border-radius: 8px;
-      overflow: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      max-height: 75vh;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      min-width: 700px;
-    }
-
-    th,
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #ddd;
-      border-right: 1px solid #eee;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #24292f;
-      color: white;
-      z-index: 1;
-    }
-
-    tr:hover td {
-      background: #f5f5f5;
-    }
-
-    #status {
-      margin: 10px 0;
-      color: #666;
-    }
-
-    .error {
-      color: #b00020;
-      background: #ffecec;
-      padding: 12px;
-      border-radius: 6px;
-    }
-  </style>
+}
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="app">
 
-    <h1>Excel Verileri</h1>
+    <div class="header">
+        <div class="header-row">
+            <div class="title">
+                Excel Verileri
+            </div>
+
+            <div id="status" class="status">
+                Hazırlanıyor...
+            </div>
+        </div>
+    </div>
 
     <div class="toolbar">
-      <input
-        type="text"
-        id="search"
-        placeholder="Tabloda ara..."
-      >
 
-      <button onclick="downloadExcel()">
-        Excel'i İndir
-      </button>
+        <input
+            id="search"
+            class="search"
+            type="search"
+            placeholder="Tabloda ara..."
+            autocomplete="off"
+        >
+
+        <button
+            id="download"
+            class="button"
+        >
+            Excel
+        </button>
+
     </div>
 
-    <div id="status">Excel dosyası yükleniyor...</div>
-
-    <div class="table-container">
-      <div id="table"></div>
+    <div
+        id="tableWrapper"
+        class="table-wrapper"
+    >
+        <div
+            id="virtualTable"
+            class="virtual-table"
+        ></div>
     </div>
 
-  </div>
+</div>
 
-  <script>
 
-    let workbook;
-    let originalData = [];
+<div
+    id="loading"
+    class="loading"
+>
 
-    // Excel dosyasını yükle
-    fetch("data.xlsx")
-      .then(response => {
+    <div class="spinner"></div>
+
+    <div
+        id="loadingText"
+        class="loading-text"
+    >
+        Excel yükleniyor...
+    </div>
+
+</div>
+
+
+<script>
+
+"use strict";
+
+/*
+====================================================
+AYARLAR
+====================================================
+*/
+
+const FILE = "data.xlsx";
+
+const ROW_HEIGHT = 42;
+
+const BUFFER_ROWS = 8;
+
+const DEFAULT_COLUMN_WIDTH = 150;
+
+const MIN_COLUMN_WIDTH = 80;
+
+const MAX_COLUMN_WIDTH = 400;
+
+
+/*
+====================================================
+GLOBAL VERİ
+====================================================
+*/
+
+let workbook = null;
+
+let data = [];
+
+let headers = [];
+
+let filteredIndexes = [];
+
+let columnWidths = [];
+
+let rafId = null;
+
+
+/*
+====================================================
+ELEMENTLER
+====================================================
+*/
+
+const loading =
+    document.getElementById("loading");
+
+const loadingText =
+    document.getElementById("loadingText");
+
+const status =
+    document.getElementById("status");
+
+const tableWrapper =
+    document.getElementById("tableWrapper");
+
+const virtualTable =
+    document.getElementById("virtualTable");
+
+const search =
+    document.getElementById("search");
+
+const download =
+    document.getElementById("download");
+
+
+/*
+====================================================
+LOADING TEXT
+====================================================
+*/
+
+function setLoading(text) {
+
+    loadingText.textContent = text;
+
+}
+
+
+/*
+====================================================
+EXCEL YÜKLE
+====================================================
+*/
+
+async function loadExcel() {
+
+    try {
+
+        setLoading("Excel dosyası indiriliyor...");
+
+        const response =
+            await fetch(FILE, {
+                cache: "default"
+            });
+
         if (!response.ok) {
-          throw new Error("data.xlsx bulunamadı.");
+            throw new Error(
+                "data.xlsx bulunamadı (" +
+                response.status +
+                ")"
+            );
         }
 
-        return response.arrayBuffer();
-      })
-      .then(data => {
+        const contentLength =
+            response.headers.get(
+                "content-length"
+            );
 
-        workbook = XLSX.read(data, {
-          type: "array"
-        });
+        const total =
+            Number(contentLength) || 0;
 
-        // İlk sheet'i al
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        const reader =
+            response.body.getReader();
 
-        // Excel → JSON
-        originalData = XLSX.utils.sheet_to_json(
-          worksheet,
-          {
-            header: 1,
-            defval: ""
-          }
+        const chunks = [];
+
+        let received = 0;
+
+        while (true) {
+
+            const { done, value } =
+                await reader.read();
+
+            if (done) break;
+
+            chunks.push(value);
+
+            received += value.length;
+
+            if (total) {
+
+                const percent =
+                    Math.round(
+                        received / total * 100
+                    );
+
+                setLoading(
+                    "Excel indiriliyor: " +
+                    percent +
+                    "%"
+                );
+
+            }
+
+        }
+
+        const buffer =
+            new Uint8Array(received);
+
+        let offset = 0;
+
+        for (const chunk of chunks) {
+
+            buffer.set(
+                chunk,
+                offset
+            );
+
+            offset += chunk.length;
+
+        }
+
+        /*
+        Bellekte gereksiz kopyaları
+        mümkün olduğunca azalt.
+        */
+
+        chunks.length = 0;
+
+        setLoading(
+            "Excel okunuyor..."
         );
 
-        renderTable(originalData);
+        /*
+        XLSX parse işlemi ağır olabilir.
+        */
 
-        document.getElementById("status").textContent =
-          `${firstSheetName} yüklendi • ${Math.max(originalData.length - 1, 0)} satır`;
+        await new Promise(
+            resolve => setTimeout(
+                resolve,
+                20
+            )
+        );
 
-      })
-      .catch(error => {
+        workbook =
+            XLSX.read(
+                buffer,
+                {
+                    type: "array",
+                    cellDates: true,
+                    cellNF: false,
+                    cellStyles: false
+                }
+            );
 
-        document.getElementById("status").innerHTML =
-          `<div class="error">
-            Excel yüklenemedi: ${error.message}
-          </div>`;
+        /*
+        Buffer artık gerekmiyor.
+        */
 
-      });
+        buffer.fill(0);
 
+        processFirstSheet();
 
-    // Tabloyu oluştur
-    function renderTable(data) {
+    }
+    catch (error) {
 
-      if (!data.length) {
-        document.getElementById("table").innerHTML =
-          "<p>Excel dosyasında veri bulunamadı.</p>";
-        return;
-      }
+        console.error(error);
 
-      let html = "<table>";
+        loading.innerHTML =
+            `<div class="error">
+                <strong>Excel yüklenemedi.</strong>
+                <br><br>
+                ${escapeHtml(error.message)}
+            </div>`;
 
-      // Başlık
-      html += "<thead><tr>";
-
-      data[0].forEach(cell => {
-        html += `<th>${escapeHtml(cell)}</th>`;
-      });
-
-      html += "</tr></thead>";
-
-      // Satırlar
-      html += "<tbody>";
-
-      data.slice(1).forEach(row => {
-
-        html += "<tr>";
-
-        for (let i = 0; i < data[0].length; i++) {
-
-          const value = row[i] ?? "";
-
-          html += `<td>${escapeHtml(value)}</td>`;
-        }
-
-        html += "</tr>";
-
-      });
-
-      html += "</tbody>";
-      html += "</table>";
-
-      document.getElementById("table").innerHTML = html;
     }
 
+}
 
-    // Arama
-    document.getElementById("search").addEventListener(
-      "input",
-      function () {
 
-        const searchText = this.value
-          .toLowerCase()
-          .trim();
+/*
+====================================================
+İLK SHEET
+====================================================
+*/
 
-        if (!searchText) {
-          renderTable(originalData);
-          return;
-        }
+function processFirstSheet() {
 
-        const header = originalData[0];
+    const sheetName =
+        workbook.SheetNames[0];
 
-        const filteredRows = originalData
-          .slice(1)
-          .filter(row =>
-            row.some(cell =>
-              String(cell)
-                .toLowerCase()
-                .includes(searchText)
+    const sheet =
+        workbook.Sheets[sheetName];
+
+    setLoading(
+        "Tablo hazırlanıyor..."
+    );
+
+    /*
+    header:1 kullanıyoruz.
+    Böylece object üretmek yerine
+    doğrudan array kullanıyoruz.
+    */
+
+    data =
+        XLSX.utils.sheet_to_json(
+            sheet,
+            {
+                header: 1,
+                defval: "",
+                raw: true
+            }
+        );
+
+    /*
+    Workbook artık gerekmiyor.
+    */
+
+    workbook = null;
+
+    if (!data.length) {
+
+        throw new Error(
+            "Excel dosyasında veri bulunamadı."
+        );
+
+    }
+
+    headers =
+        data[0] || [];
+
+    /*
+    Sütun genişliklerini hesapla.
+    */
+
+    calculateColumnWidths();
+
+    /*
+    Satır indexlerini oluştur.
+    */
+
+    filteredIndexes =
+        new Array(
+            Math.max(
+                data.length - 1,
+                0
             )
-          );
+        );
 
-        renderTable([
-          header,
-          ...filteredRows
-        ]);
-      }
+    for (
+        let i = 0;
+        i < filteredIndexes.length;
+        i++
+    ) {
+
+        filteredIndexes[i] =
+            i + 1;
+
+    }
+
+    /*
+    Tablo yüksekliği.
+    */
+
+    buildTable();
+
+    /*
+    Yükleme ekranını kapat.
+    */
+
+    loading.classList.add(
+        "hidden"
+    );
+
+    updateStatus();
+
+}
+
+
+/*
+====================================================
+SÜTUN GENİŞLİĞİ
+====================================================
+*/
+
+function calculateColumnWidths() {
+
+    columnWidths =
+        headers.map(
+            (header, columnIndex) => {
+
+                let maxLength =
+                    String(
+                        header ?? ""
+                    ).length;
+
+                /*
+                İlk 100 satırı kontrol et.
+                Tüm Excel'i taramak gereksiz.
+                */
+
+                const sampleCount =
+                    Math.min(
+                        data.length,
+                        101
+                    );
+
+                for (
+                    let r = 1;
+                    r < sampleCount;
+                    r++
+                ) {
+
+                    const value =
+                        data[r]?.[
+                            columnIndex
+                        ];
+
+                    if (
+                        value !== undefined &&
+                        value !== null
+                    ) {
+
+                        maxLength =
+                            Math.max(
+                                maxLength,
+                                String(
+                                    value
+                                ).length
+                            );
+
+                    }
+
+                }
+
+                let width =
+                    maxLength * 8 + 24;
+
+                width =
+                    Math.max(
+                        width,
+                        MIN_COLUMN_WIDTH
+                    );
+
+                width =
+                    Math.min(
+                        width,
+                        MAX_COLUMN_WIDTH
+                    );
+
+                return width;
+
+            }
+        );
+
+}
+
+
+/*
+====================================================
+TABLOYU OLUŞTUR
+====================================================
+*/
+
+function buildTable() {
+
+    virtualTable.innerHTML = "";
+
+    /*
+    HEADER
+    */
+
+    const tableHeader =
+        document.createElement(
+            "div"
+        );
+
+    tableHeader.className =
+        "table-header";
+
+    headers.forEach(
+        (header, index) => {
+
+            const cell =
+                document.createElement(
+                    "div"
+                );
+
+            cell.className =
+                "header-cell";
+
+            cell.style.width =
+                columnWidths[index] +
+                "px";
+
+            cell.textContent =
+                header ?? "";
+
+            tableHeader.appendChild(
+                cell
+            );
+
+        }
+    );
+
+    virtualTable.appendChild(
+        tableHeader
     );
 
 
-    // Excel'i indir
-    function downloadExcel() {
+    /*
+    SATIR ALANI
+    */
 
-      const link = document.createElement("a");
+    const rowsContainer =
+        document.createElement(
+            "div"
+        );
 
-      link.href = "data.xlsx";
-      link.download = "data.xlsx";
+    rowsContainer.className =
+        "rows-container";
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    rowsContainer.style.height =
+        (
+            filteredIndexes.length *
+            ROW_HEIGHT
+        ) + "px";
+
+    virtualTable.appendChild(
+        rowsContainer
+    );
+
+
+    /*
+    Scroll olayını bağla.
+    */
+
+    tableWrapper.addEventListener(
+        "scroll",
+        scheduleRender,
+        {
+            passive: true
+        }
+    );
+
+    renderVisibleRows();
+
+}
+
+
+/*
+====================================================
+VIRTUAL SCROLL
+====================================================
+*/
+
+function scheduleRender() {
+
+    if (rafId !== null) {
+        return;
+    }
+
+    rafId =
+        requestAnimationFrame(
+            () => {
+
+                rafId = null;
+
+                renderVisibleRows();
+
+            }
+        );
+
+}
+
+
+/*
+====================================================
+SADECE GÖRÜNEN SATIRLAR
+====================================================
+*/
+
+function renderVisibleRows() {
+
+    const rowsContainer =
+        virtualTable.querySelector(
+            ".rows-container"
+        );
+
+    if (!rowsContainer) {
+        return;
+    }
+
+    const scrollTop =
+        tableWrapper.scrollTop;
+
+    const viewportHeight =
+        tableWrapper.clientHeight;
+
+    let start =
+        Math.floor(
+            scrollTop /
+            ROW_HEIGHT
+        ) -
+        BUFFER_ROWS;
+
+    let end =
+        Math.ceil(
+            (
+                scrollTop +
+                viewportHeight
+            ) /
+            ROW_HEIGHT
+        ) +
+        BUFFER_ROWS;
+
+    start =
+        Math.max(
+            start,
+            0
+        );
+
+    end =
+        Math.min(
+            end,
+            filteredIndexes.length
+        );
+
+
+    /*
+    Önce mevcut satırları temizle.
+    */
+
+    rowsContainer.innerHTML = "";
+
+
+    /*
+    Sadece ekranda gereken
+    ~30-60 satırı oluştur.
+    */
+
+    for (
+        let visibleIndex = start;
+        visibleIndex < end;
+        visibleIndex++
+    ) {
+
+        const dataIndex =
+            filteredIndexes[
+                visibleIndex
+            ];
+
+        const rowData =
+            data[dataIndex] || [];
+
+        const row =
+            document.createElement(
+                "div"
+            );
+
+        row.className =
+            "row";
+
+        row.style.top =
+            (
+                visibleIndex *
+                ROW_HEIGHT
+            ) + "px";
+
+
+        for (
+            let columnIndex = 0;
+            columnIndex < headers.length;
+            columnIndex++
+        ) {
+
+            const cell =
+                document.createElement(
+                    "div"
+                );
+
+            cell.className =
+                "cell";
+
+            cell.style.width =
+                columnWidths[
+                    columnIndex
+                ] + "px";
+
+            const value =
+                rowData[
+                    columnIndex
+                ];
+
+            cell.textContent =
+                formatValue(value);
+
+            row.appendChild(
+                cell
+            );
+
+        }
+
+        rowsContainer.appendChild(
+            row
+        );
+
+    }
+
+}
+
+
+/*
+====================================================
+DEĞER FORMATLAMA
+====================================================
+*/
+
+function formatValue(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+    if (
+        value instanceof Date
+    ) {
+
+        return value.toLocaleDateString(
+            "tr-TR"
+        );
+
+    }
+
+    return String(value);
+
+}
+
+
+/*
+====================================================
+ARAMA
+====================================================
+*/
+
+let searchTimer = null;
+
+search.addEventListener(
+    "input",
+    function () {
+
+        clearTimeout(
+            searchTimer
+        );
+
+        const query =
+            this.value
+                .trim()
+                .toLocaleLowerCase(
+                    "tr-TR"
+                );
+
+        /*
+        150ms debounce.
+        */
+
+        searchTimer =
+            setTimeout(
+                () => {
+
+                    filterData(
+                        query
+                    );
+
+                },
+                150
+            );
+
+    }
+);
+
+
+/*
+====================================================
+FİLTRELEME
+====================================================
+*/
+
+function filterData(query) {
+
+    if (!query) {
+
+        filteredIndexes =
+            new Array(
+                Math.max(
+                    data.length - 1,
+                    0
+                )
+            );
+
+        for (
+            let i = 0;
+            i < filteredIndexes.length;
+            i++
+        ) {
+
+            filteredIndexes[i] =
+                i + 1;
+
+        }
+
+    }
+    else {
+
+        const result = [];
+
+        /*
+        Satır satır kontrol.
+        */
+
+        for (
+            let i = 1;
+            i < data.length;
+            i++
+        ) {
+
+            const row =
+                data[i];
+
+            let found = false;
+
+            for (
+                let c = 0;
+                c < row.length;
+                c++
+            ) {
+
+                const value =
+                    row[c];
+
+                if (
+                    value !== undefined &&
+                    value !== null &&
+                    String(value)
+                        .toLocaleLowerCase(
+                            "tr-TR"
+                        )
+                        .includes(query)
+                ) {
+
+                    found = true;
+                    break;
+
+                }
+
+            }
+
+            if (found) {
+
+                result.push(i);
+
+            }
+
+        }
+
+        filteredIndexes =
+            result;
+
     }
 
 
-    // HTML güvenliği
-    function escapeHtml(value) {
+    /*
+    Scroll başa dönsün.
+    */
 
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    tableWrapper.scrollTop = 0;
+
+
+    /*
+    Satır yüksekliğini güncelle.
+    */
+
+    const rowsContainer =
+        virtualTable.querySelector(
+            ".rows-container"
+        );
+
+    if (rowsContainer) {
+
+        rowsContainer.style.height =
+            (
+                filteredIndexes.length *
+                ROW_HEIGHT
+            ) + "px";
+
     }
 
-  </script>
+    renderVisibleRows();
+
+    updateStatus();
+
+}
+
+
+/*
+====================================================
+STATUS
+====================================================
+*/
+
+function updateStatus() {
+
+    const total =
+        Math.max(
+            data.length - 1,
+            0
+        );
+
+    const shown =
+        filteredIndexes.length;
+
+    if (shown === total) {
+
+        status.textContent =
+            total.toLocaleString(
+                "tr-TR"
+            ) +
+            " satır";
+
+    }
+    else {
+
+        status.textContent =
+            shown.toLocaleString(
+                "tr-TR"
+            ) +
+            " / " +
+            total.toLocaleString(
+                "tr-TR"
+            );
+
+    }
+
+}
+
+
+/*
+====================================================
+EXCEL İNDİR
+====================================================
+*/
+
+download.addEventListener(
+    "click",
+    function () {
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.href =
+            FILE;
+
+        link.download =
+            "data.xlsx";
+
+        document.body.appendChild(
+            link
+        );
+
+        link.click();
+
+        link.remove();
+
+    }
+);
+
+
+/*
+====================================================
+HTML ESCAPE
+====================================================
+*/
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/*
+====================================================
+BAŞLAT
+====================================================
+*/
+
+loadExcel();
+
+</script>
 
 </body>
 </html>
