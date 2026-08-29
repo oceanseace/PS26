@@ -1,5 +1,7 @@
 import json
 import re
+import shutil
+from datetime import datetime, date, time
 from pathlib import Path
 
 from openpyxl import load_workbook
@@ -12,50 +14,104 @@ from openpyxl import load_workbook
 SOURCE = Path("data.xlsx")
 OUTPUT = Path("data")
 
-# İlk satır başlık olarak kabul edilir.
-HEADER_ROW = 1
+DEFAULT_SHEET = "TICKET"
 
 
 # =========================================================
-# DOSYA ADI TEMİZLEME
+# DOSYA ADI
 # =========================================================
 
 def safe_filename(name):
+    """
+    Sheet adını güvenli dosya adına çevirir.
+    """
     name = str(name)
 
-    # Windows/GitHub için problem oluşturabilecek karakterleri temizle
-    name = re.sub(r'[<>:"/\\|?*]', '_', name)
+    name = re.sub(
+        r'[<>:"/\\|?*]',
+        "_",
+        name
+    )
 
-    # Nokta/boşluk problemlerini azalt
     name = name.strip(" .")
 
     return name or "sheet"
 
 
 # =========================================================
-# DEĞERİ JSON'A UYGUN HALE GETİR
+# EXCEL DEĞERİNİ JSON'A ÇEVİR
 # =========================================================
 
 def clean_value(value):
+    """
+    Excel'den gelen değeri JSON için temizler.
+
+    ÖNEMLİ:
+    datetime -> SADECE TARİH
+    Saat kısmı kesinlikle yazılmaz.
+    Örn:
+    29.08.2026
+    """
 
     if value is None:
         return ""
 
-    # Tarih vb. değerleri string olarak kaydet
-    if hasattr(value, "isoformat"):
-        try:
-            return value.isoformat()
-        except Exception:
-            pass
 
-    # JSON'un desteklemediği tipleri string yap
-    if not isinstance(
+    # -----------------------------------------------------
+    # datetime
+    # -----------------------------------------------------
+
+    if isinstance(value, datetime):
+
+        return value.strftime(
+            "%d.%m.%Y"
+        )
+
+
+    # -----------------------------------------------------
+    # date
+    # -----------------------------------------------------
+
+    if isinstance(value, date):
+
+        return value.strftime(
+            "%d.%m.%Y"
+        )
+
+
+    # -----------------------------------------------------
+    # time
+    # -----------------------------------------------------
+
+    if isinstance(value, time):
+
+        # Kullanıcı saat istemediği için
+        # saat hücrelerini boş bırakıyoruz.
+        return ""
+
+
+    # -----------------------------------------------------
+    # Diğer JSON uyumlu değerler
+    # -----------------------------------------------------
+
+    if isinstance(
         value,
-        (str, int, float, bool)
+        (
+            str,
+            int,
+            float,
+            bool
+        )
     ):
-        return str(value)
 
-    return value
+        return value
+
+
+    # -----------------------------------------------------
+    # Bilinmeyen tip
+    # -----------------------------------------------------
+
+    return str(value)
 
 
 # =========================================================
@@ -64,22 +120,71 @@ def clean_value(value):
 
 def main():
 
+    print()
+    print("=" * 60)
+    print("PS26 EXCEL -> JSON DONUSTURUCU")
+    print("=" * 60)
+    print()
+
+
+    # -----------------------------------------------------
+    # Excel kontrolü
+    # -----------------------------------------------------
+
     if not SOURCE.exists():
 
-        print("HATA: data.xlsx bulunamadı.")
-        print(f"Aranan dosya: {SOURCE.resolve()}")
+        print(
+            "HATA: data.xlsx bulunamadı!"
+        )
+
+        print(
+            f"Aranan dosya: {SOURCE.resolve()}"
+        )
+
+        print()
+
+        input(
+            "Kapatmak için Enter'a basın..."
+        )
+
         return
 
-    print()
-    print("Excel okunuyor...")
-    print(f"Kaynak: {SOURCE.resolve()}")
-    print()
+
+    # -----------------------------------------------------
+    # Eski data klasörünü tamamen sil
+    # -----------------------------------------------------
+
+    if OUTPUT.exists():
+
+        print(
+            "Eski data klasörü temizleniyor..."
+        )
+
+        shutil.rmtree(
+            OUTPUT
+        )
+
+
+    OUTPUT.mkdir(
+        parents=True,
+        exist_ok=True
+    )
 
 
     # -----------------------------------------------------
-    # Workbook'u read_only modunda açıyoruz.
-    # Böylece RAM kullanımı azalır.
+    # Excel'i read-only aç
     # -----------------------------------------------------
+
+    print(
+        "Excel okunuyor..."
+    )
+
+    print(
+        f"Kaynak: {SOURCE.resolve()}"
+    )
+
+    print()
+
 
     workbook = load_workbook(
         SOURCE,
@@ -88,21 +193,11 @@ def main():
     )
 
 
-    # -----------------------------------------------------
-    # data klasörünü oluştur
-    # -----------------------------------------------------
-
-    OUTPUT.mkdir(
-        parents=True,
-        exist_ok=True
-    )
-
-
     sheet_index = []
 
 
     # -----------------------------------------------------
-    # Her sheet'i ayrı JSON yap
+    # TÜM SHEETLER
     # -----------------------------------------------------
 
     for sheet in workbook.worksheets:
@@ -113,13 +208,24 @@ def main():
             f"İşleniyor: {sheet_name}"
         )
 
-        rows = sheet.iter_rows(
+
+        rows_iterator = sheet.iter_rows(
             values_only=True
         )
 
+
+        # -------------------------------------------------
+        # BAŞLIK SATIRI
+        # -------------------------------------------------
+
         try:
-            header_values = next(rows)
+
+            header_values = next(
+                rows_iterator
+            )
+
         except StopIteration:
+
             header_values = []
 
 
@@ -129,46 +235,62 @@ def main():
         ]
 
 
+        # -------------------------------------------------
+        # VERİ SATIRLARI
+        # -------------------------------------------------
+
         data_rows = []
 
-
-        for row in rows:
+        for row in rows_iterator:
 
             cleaned = [
                 clean_value(value)
                 for value in row
             ]
 
-            # Tamamen boş satırları at
+
+            # -------------------------------------------------
+            # Tamamen boş satırı at
+            # -------------------------------------------------
+
             if not any(
                 value != ""
                 for value in cleaned
             ):
+
                 continue
 
-            # Başlık kadar sütun garanti et
+
+            # -------------------------------------------------
+            # Başlık sayısına göre sütunları düzelt
+            # -------------------------------------------------
+
             if len(cleaned) < len(headers):
 
                 cleaned.extend(
                     [""] *
                     (
-                        len(headers) -
+                        len(headers)
+                        -
                         len(cleaned)
                     )
                 )
 
-            # Fazla sütun varsa başlık sayısına göre kes
+
             elif len(cleaned) > len(headers):
 
                 cleaned = cleaned[
                     :len(headers)
                 ]
 
-            data_rows.append(cleaned)
+
+            data_rows.append(
+                cleaned
+            )
 
 
         # -------------------------------------------------
-        # Sheet JSON
+        # SHEET JSON
         # -------------------------------------------------
 
         sheet_data = {
@@ -180,13 +302,22 @@ def main():
 
         filename = (
             safe_filename(sheet_name)
-            + ".json"
+            +
+            ".json"
         )
 
-        output_file =OUTPUT / filename
+
+        output_file = (
+            OUTPUT
+            /
+            filename
+        )
 
 
-        # UTF-8 + kompakt JSON
+        # -------------------------------------------------
+        # JSON YAZ
+        # -------------------------------------------------
+
         with open(
             output_file,
             "w",
@@ -200,6 +331,10 @@ def main():
                 separators=(",", ":")
             )
 
+
+        # -------------------------------------------------
+        # INDEX BİLGİSİ
+        # -------------------------------------------------
 
         sheet_index.append({
             "name": sheet_name,
@@ -225,22 +360,31 @@ def main():
 
 
     # -----------------------------------------------------
-    # INDEX JSON
+    # VARSAYILAN SHEET
+    # -----------------------------------------------------
+
+    default_sheet = ""
+
+    for item in sheet_index:
+
+        if item["name"] == DEFAULT_SHEET:
+
+            default_sheet = DEFAULT_SHEET
+
+            break
+
+
+    # TICKET yoksa ilk sheet
+    if not default_sheet and sheet_index:
+        default_sheet = sheet_index[0]["name"]
+
+
+    # -----------------------------------------------------
+    # INDEX.JSON
     # -----------------------------------------------------
 
     index_data = {
-        "defaultSheet": (
-            "TICKET"
-            if any(
-                item["name"] == "TICKET"
-                for item in sheet_index
-            )
-            else (
-                sheet_index[0]["name"]
-                if sheet_index
-                else ""
-            )
-        ),
+        "defaultSheet": default_sheet,
         "sheets": sheet_index
     }
 
@@ -262,25 +406,52 @@ def main():
     workbook.close()
 
 
+    # -----------------------------------------------------
+    # SONUÇ
+    # -----------------------------------------------------
+
     print()
     print("=" * 60)
     print("TAMAMLANDI")
     print("=" * 60)
     print()
+
     print(
         f"{len(sheet_index)} sheet oluşturuldu."
     )
+
     print()
-    print(
-        f"Çıktı klasörü: {OUTPUT.resolve()}"
-    )
-    print()
+
     print(
         "Varsayılan sheet: "
-        + index_data["defaultSheet"]
+        +
+        default_sheet
     )
+
+    print()
+
+    print(
+        "Oluşan sheetler:"
+    )
+
+    for item in sheet_index:
+
+        print(
+            f"  - {item['name']}: "
+            f"{item['rows']:,} satır / "
+            f"{item['columns']:,} sütun"
+        )
+
+    print()
+
+    print(
+        f"Çıktı klasörü: "
+        f"{OUTPUT.resolve()}"
+    )
+
     print()
 
 
 if __name__ == "__main__":
+
     main()
