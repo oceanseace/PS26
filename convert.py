@@ -115,6 +115,47 @@ def clean_value(value):
 
 
 # =========================================================
+# KİŞİSEL VERİ SÜZGECİ
+# =========================================================
+
+# Bu başlıkları taşıyan sütunlar yayımlanmaz (büyük/küçük
+# harf ve Türkçe harf farkı gözetilmez).
+GIZLI_SUTUNLAR = {
+    "MUSTERI",
+    "MUSTERI NO",
+    "MUSTERI ADI",
+    "SATICI",
+    "SATIS TEMSILCISI AD SOYAD",
+    "TELEFON",
+}
+
+# Satır etiketleri kişi adı olan özet sayfalar hiç yayımlanmaz.
+GIZLI_SAYFALAR = {
+    "PVT",
+}
+
+
+def _sade_baslik(baslik):
+    s = str(baslik or "").replace("i", "İ").replace("ı", "I").upper()
+    s = s.translate(str.maketrans("ÇĞİÖŞÜ", "CGIOSU"))
+    return re.sub(r"[^A-Z0-9]+", " ", s).strip()
+
+
+def gizli_sutunlari_cikar(headers, rows):
+    """Kişisel veri sütunlarını başlıktan ve satırlardan çıkarır."""
+    kalan = [
+        i for i, baslik in enumerate(headers)
+        if _sade_baslik(baslik) not in GIZLI_SUTUNLAR
+    ]
+    if len(kalan) == len(headers):
+        return headers, rows
+    return (
+        [headers[i] for i in kalan],
+        [[row[i] if i < len(row) else "" for i in kalan] for row in rows],
+    )
+
+
+# =========================================================
 # ANA İŞLEM
 # =========================================================
 
@@ -204,6 +245,12 @@ def main():
 
         sheet_name = sheet.title
 
+        if _sade_baslik(sheet_name) in GIZLI_SAYFALAR:
+            print(
+                f"Yayımlanmıyor (kişi adları): {sheet_name}"
+            )
+            continue
+
         print(
             f"İşleniyor: {sheet_name}"
         )
@@ -292,6 +339,17 @@ def main():
         # -------------------------------------------------
         # SHEET JSON
         # -------------------------------------------------
+
+        # -------------------------------------------------
+        # KİŞİSEL VERİ SÜZGECİ
+        # Site herkese açık yayımlandığı için müşteri numarası
+        # ve satıcı adı sütunları JSON'a hiç yazılmaz.
+        # -------------------------------------------------
+
+        headers, data_rows = gizli_sutunlari_cikar(
+            headers,
+            data_rows
+        )
 
         sheet_data = {
             "name": sheet_name,
